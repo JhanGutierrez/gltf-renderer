@@ -9,7 +9,7 @@
 
 | Property    | Attribute    | Description | Type                 | Default     |
 | ----------- | ------------ | ----------- | -------------------- | ----------- |
-| `config`    | --           |             | `GltfRendererConfig` | `{}`        |
+| `config`    | --           |             | `GltfRendererConfig` | `undefined` |
 | `modelPath` | `model-path` |             | `string`             | `undefined` |
 
 

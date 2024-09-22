@@ -27,6 +27,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import merge from 'deepmerge';
+import deepEqual from 'deep-equal';
 import gltfDispose from './gltf-dispose';
 import { defaultConfig } from './default-config';
 
@@ -39,14 +40,14 @@ import {  GltfRendererConfig, GltfRendererLoad, GltfRendererUpdate } from './glt
 export class GltfRenderer {
   @Element() element: HTMLElement;
   @Prop() modelPath: string;
-  @Prop() config: GltfRendererConfig = {};
+  @Prop() config: GltfRendererConfig;
   @Event() rendererLoad: EventEmitter<GltfRendererLoad>;
   @Event() rendererUpdate: EventEmitter<GltfRendererUpdate>;
   @Event() loadProgress : EventEmitter<number>;
 
-  private _initConfig: GltfRendererConfig = defaultConfig;
-  private _rendererLoad: GltfRendererLoad = {};
-  private _rendererUpdate: GltfRendererUpdate = {};
+  private _initConfig: GltfRendererConfig;
+  private _rendererLoad: GltfRendererLoad;
+  private _rendererUpdate: GltfRendererUpdate;
   
   private _scene: Scene = new Scene();
   private _camera: PerspectiveCamera;
@@ -62,7 +63,7 @@ export class GltfRenderer {
   private _modelHolder: Group = new Group();
 
   componentDidLoad() {
-    this._initConfig = merge(defaultConfig, this.config);
+    this._initConfig = merge(defaultConfig, this.config ?? {});
     this.initializeScene();
     this.setupEventListeners();
   }
@@ -77,6 +78,7 @@ export class GltfRenderer {
     
     if (this.modelPath) 
       this.loadModel(this.modelPath);
+
     this._scene.add(this._sceneThree);
     
     this.startRenderLoop();
@@ -89,27 +91,33 @@ export class GltfRenderer {
 
   @Watch('modelPath')
   modelChanged(newValue: string, oldValue: string) {
-    if (newValue !== oldValue) this.loadModel(newValue);
+    if (newValue !== oldValue) 
+      this.loadModel(newValue);
   }
 
   @Watch('config')
   updateConfig(newConfig: GltfRendererConfig) {
-    const config = merge(this._initConfig, newConfig);
-    this.updateGridVisibility(config.grid);
-    this.updateEdgesVisibility(config.edges);
-    this.updateAutoRotate(config.controls);
+    if (this._initConfig && !deepEqual(this._initConfig, newConfig ?? {})) {
+      const config = merge(this._initConfig, newConfig);
+      this.updateGridVisibility(config.grid);
+      this.updateEdgesVisibility(config.edges);
+      this.updateAutoRotate(config.controls);
+    }
   }
 
   private updateGridVisibility(gridConfig) {
-    if (gridConfig) this._gridHelper.material.opacity = gridConfig.enable ? 1 : 0;
+    if (gridConfig) 
+      this._gridHelper.material.opacity = gridConfig.enable ? 1 : 0;
   }
 
   private updateEdgesVisibility(edgesConfig) {
-    if (edgesConfig) edgesConfig.enable ? this._camera.layers.enable(1) : this._camera.layers.disable(1);
+    if (edgesConfig) 
+      edgesConfig.enable ? this._camera.layers.enable(1) : this._camera.layers.disable(1);
   }
 
   private updateAutoRotate(controlsConfig) {
-    if (controlsConfig) this._orbitControls.autoRotate = controlsConfig.autoRotate;
+    if (controlsConfig) 
+      this._orbitControls.autoRotate = controlsConfig.autoRotate;
   }
 
   private setupLoadingManager() {
@@ -226,16 +234,15 @@ export class GltfRenderer {
   }
 
   private loadModel(modelPath: string) {
-    if (!modelPath) return;
-
-    this.clearPreviousModel();
-
-    new GLTFLoader(this._loadingManager).load(
-      modelPath,
-      gltf => this.processLoadedModel(gltf.scene),
-      undefined,
-      error => console.error('Failed to load _model:', error),
-    );
+    if(modelPath){
+      this.clearPreviousModel();
+      new GLTFLoader(this._loadingManager).load(
+        modelPath,
+        gltf => this.processLoadedModel(gltf.scene),
+        undefined,
+        error => console.error('Failed to load _model:', error),
+      );
+    }
   }
 
   private clearPreviousModel() {
