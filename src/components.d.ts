@@ -5,57 +5,59 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
+import { GltfRendererConfig, GltfRendererLoad, GltfRendererUpdate } from "./components/gltf-renderer/gltf-renderer-config";
+export { GltfRendererConfig, GltfRendererLoad, GltfRendererUpdate } from "./components/gltf-renderer/gltf-renderer-config";
 export namespace Components {
-    interface MyComponent {
-        /**
-          * The first name
-         */
-        "first": string;
-        /**
-          * The last name
-         */
-        "last": string;
-        /**
-          * The middle name
-         */
-        "middle": string;
+    interface GltfRenderer {
+        "config": GltfRendererConfig;
+        "modelPath": string;
     }
 }
+export interface GltfRendererCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLGltfRendererElement;
+}
 declare global {
-    interface HTMLMyComponentElement extends Components.MyComponent, HTMLStencilElement {
+    interface HTMLGltfRendererElementEventMap {
+        "rendererLoad": GltfRendererLoad;
+        "rendererUpdate": GltfRendererUpdate;
+        "loadProgress": number;
     }
-    var HTMLMyComponentElement: {
-        prototype: HTMLMyComponentElement;
-        new (): HTMLMyComponentElement;
+    interface HTMLGltfRendererElement extends Components.GltfRenderer, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLGltfRendererElementEventMap>(type: K, listener: (this: HTMLGltfRendererElement, ev: GltfRendererCustomEvent<HTMLGltfRendererElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLGltfRendererElementEventMap>(type: K, listener: (this: HTMLGltfRendererElement, ev: GltfRendererCustomEvent<HTMLGltfRendererElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLGltfRendererElement: {
+        prototype: HTMLGltfRendererElement;
+        new (): HTMLGltfRendererElement;
     };
     interface HTMLElementTagNameMap {
-        "my-component": HTMLMyComponentElement;
+        "gltf-renderer": HTMLGltfRendererElement;
     }
 }
 declare namespace LocalJSX {
-    interface MyComponent {
-        /**
-          * The first name
-         */
-        "first"?: string;
-        /**
-          * The last name
-         */
-        "last"?: string;
-        /**
-          * The middle name
-         */
-        "middle"?: string;
+    interface GltfRenderer {
+        "config"?: GltfRendererConfig;
+        "modelPath"?: string;
+        "onLoadProgress"?: (event: GltfRendererCustomEvent<number>) => void;
+        "onRendererLoad"?: (event: GltfRendererCustomEvent<GltfRendererLoad>) => void;
+        "onRendererUpdate"?: (event: GltfRendererCustomEvent<GltfRendererUpdate>) => void;
     }
     interface IntrinsicElements {
-        "my-component": MyComponent;
+        "gltf-renderer": GltfRenderer;
     }
 }
 export { LocalJSX as JSX };
 declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
-            "my-component": LocalJSX.MyComponent & JSXBase.HTMLAttributes<HTMLMyComponentElement>;
+            "gltf-renderer": LocalJSX.GltfRenderer & JSXBase.HTMLAttributes<HTMLGltfRendererElement>;
         }
     }
 }
